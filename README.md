@@ -1,4 +1,5 @@
-Cognate — Side-by-side AI provider comparison (Electron)
+# Cognate
+_Side-by-side AI provider comparison_
 
 Cognate is a desktop app for comparing responses from multiple AI providers in one place. It’s built with Electron Forge + Webpack, React + Tailwind, and a small set of main-process adapters for OpenAI, Anthropic (Claude), Google Gemini, and DeepSeek.
 
