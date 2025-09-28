@@ -11,6 +11,6 @@ It includes secure API-key storage (Keytar on macOS Keychain / Windows Credentia
 - **One prompt → many models:** fire requests concurrently and compare outputs  
 - **Collapsible response cards** with a fullscreen modal for readability  
 - **Secure API Keys** with Keytar (stored in the OS credential vault)  
-- **Attachments (PDF):** drag & drop PDFs and include them in OpenAI requests (uploads via Files API; used as `input_file` alongside your `input_text`)  
+- **Attachments (PDF):** drag & drop PDFs and include them in OpenAI/Claude requests
 - **IPC bridge:** renderer stays sandboxed; requests happen in the main process  
 - **Dark, minimal UI** built with Tailwind
