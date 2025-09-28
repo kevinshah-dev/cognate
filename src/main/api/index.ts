@@ -42,7 +42,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           if (!apiKeyAnthropic || typeof apiKeyAnthropic !== "string") {
             return { status: "error", error: "Anthropic API key is not set." };
           }
-          return callAnthropic(provider, prompt, apiKeyAnthropic);
+          return callAnthropic(provider, prompt, apiKeyAnthropic, attachments);
 
         case "deepseek":
           const apiKeyDeepseek = await getApiKey("deepseek");

@@ -16,6 +16,65 @@ const selector = (state: AppState) => ({
   providers: state.providers,
 });
 
+function CopyWithTooltip({
+  text,
+  title = "Copy",
+  stopPropagation = false,
+}: {
+  text: string;
+  title?: string;
+  stopPropagation?: boolean;
+}) {
+  const [hover, setHover] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+  const timeoutRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const onClick = async (e: React.MouseEvent) => {
+    if (stopPropagation) e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = window.setTimeout(() => setCopied(false), 1200);
+    } catch {}
+  };
+
+  return (
+    <div
+      className="relative inline-flex"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {(hover || copied) && (
+        <div
+          className={`
+            pointer-events-none absolute -top-8 right-0 px-2 py-1 rounded-md text-xs whitespace-nowrap
+            ${copied ? "bg-emerald-500 text-white" : "bg-dark-bg-secondary border border-dark-border text-dark-text-secondary"}
+            shadow
+          `}
+        >
+          {copied ? "Copied!" : title}
+        </div>
+      )}
+
+      <button
+        onClick={onClick}
+        aria-label={title}
+        className="text-dark-text-secondary hover:text-accent-blue transition-colors p-1 rounded-md hover:bg-dark-border/40"
+        title={title}
+      >
+        <Copy size={16} />
+      </button>
+    </div>
+  );
+}
+
 export const ResponseGrid = () => {
   const { responses, providers } = useAppStore(useShallow(selector));
   const [active, setActive] = React.useState<{
@@ -126,17 +185,7 @@ const CollapsedResponseCard = ({
               {response.responseTime.toFixed(0)}ms
             </span>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigator.clipboard.writeText(response.content);
-            }}
-            aria-label="Copy response"
-            className="text-dark-text-secondary hover:text-accent-blue transition-colors"
-            title="Copy"
-          >
-            <Copy size={16} />
-          </button>
+          <CopyWithTooltip text={response.content} stopPropagation />
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -214,14 +263,7 @@ const ResponseModal = ({ response, providerName, onClose }: ModalProps) => {
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigator.clipboard.writeText(response.content)}
-                aria-label="Copy response"
-                className="text-dark-text-secondary hover:text-accent-blue transition-colors"
-                title="Copy"
-              >
-                <Copy size={16} />
-              </button>
+              <CopyWithTooltip text={response.content} stopPropagation />
               <button
                 onClick={onClose}
                 aria-label="Close"

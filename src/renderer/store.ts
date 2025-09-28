@@ -116,7 +116,10 @@ const useAppStore = create<AppState>((set, get) => ({
     await Promise.all(
       selectedProviders.map(async (provider) => {
         const payload: any = { provider, prompt };
-        if (provider.id === "openai" && attachments.length > 0) {
+        if (
+          (provider.id === "openai" || provider.id === "anthropic") &&
+          attachments.length > 0
+        ) {
           // strip ArrayBuffers into plain {name,type,size,data} — ArrayBuffer passes fine over IPC
           payload.attachments = attachments.map((a) => ({
             id: a.id,

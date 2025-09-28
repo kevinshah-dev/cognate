@@ -1,2 +1,5 @@
 node_modules
 .webpack/
+out
+.DS_Store
+**/.DS_Store

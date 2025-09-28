@@ -36,7 +36,13 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "asar": true,
+        "asarUnpack": [
+          "**/*.node",
+          "node_modules/keytar/**"
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel"
@@ -65,14 +71,17 @@
                   }
                 }
               ]
-            }
+            },
+            "externals": [
+              "keytar"
+            ]
           }
         }
       ]
     }
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.60.0",
+    "@anthropic-ai/sdk": "^0.64.0",
     "@google/genai": "^1.16.0",
     "axios": "^1.11.0",
     "electron-store": "^10.1.0",
