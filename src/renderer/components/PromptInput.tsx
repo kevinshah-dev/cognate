@@ -1,8 +1,8 @@
-import React from 'react';
-import useAppStore from '../store';
-import { SendHorizonal, Plus, X } from 'lucide-react';
-import { AppState } from '../types';
-import { useShallow } from 'zustand/react/shallow';
+import React from "react";
+import useAppStore from "../store";
+import { SendHorizonal, Plus, X } from "lucide-react";
+import { AppState } from "../types";
+import { useShallow } from "zustand/react/shallow";
 
 interface PromptInputProps {
   onSend: () => void;
@@ -17,10 +17,11 @@ const selector = (state: AppState) => ({
 });
 
 export const PromptInput = ({ onSend }: PromptInputProps) => {
-  const { prompt, setPrompt, openAttachments, attachments, removeAttachment } = useAppStore(useShallow(selector));
+  const { prompt, setPrompt, openAttachments, attachments, removeAttachment } =
+    useAppStore(useShallow(selector));
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault();
       onSend();
     }
@@ -41,8 +42,11 @@ export const PromptInput = ({ onSend }: PromptInputProps) => {
       {/* attachment chips */}
       {attachments.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {attachments.map(a => (
-            <span key={a.id} className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-dark-bg-secondary border border-dark-border">
+          {attachments.map((a) => (
+            <span
+              key={a.id}
+              className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-md bg-dark-bg-secondary border border-dark-border"
+            >
               {a.name}
               <button
                 className="opacity-70 hover:opacity-100"

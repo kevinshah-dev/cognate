@@ -1,8 +1,8 @@
-import React from 'react';
-import { X, Upload, Trash2, Paperclip } from 'lucide-react';
-import useAppStore from '../store';
-import { AppState } from '../types';
-import { useShallow } from 'zustand/react/shallow';
+import React from "react";
+import { X, Upload, Trash2, Paperclip } from "lucide-react";
+import useAppStore from "../store";
+import { AppState } from "../types";
+import { useShallow } from "zustand/react/shallow";
 
 const selector = (s: AppState) => ({
   open: s.attachmentModalOpen,
@@ -13,13 +13,14 @@ const selector = (s: AppState) => ({
 });
 
 export default function AttachmentsModal() {
-  const { open, close, add, remove, attachments } = useAppStore(useShallow(selector));
+  const { open, close, add, remove, attachments } = useAppStore(
+    useShallow(selector)
+  );
 
   const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length) await add(files);
     // reset input so selecting same file twice still fires change
-    console.log("e +++++", e);
   };
 
   const onDrop = async (e: React.DragEvent) => {
@@ -43,9 +44,14 @@ export default function AttachmentsModal() {
           <div className="flex items-center justify-between p-4 border-b border-dark-border">
             <div className="flex items-center gap-2">
               <Paperclip size={18} className="text-accent-blue" />
-              <h3 className="text-md font-semibold text-dark-text">Attach PDFs</h3>
+              <h3 className="text-md font-semibold text-dark-text">
+                Attach PDFs
+              </h3>
             </div>
-            <button className="p-2 rounded-md text-dark-text-secondary hover:text-dark-text" onClick={close}>
+            <button
+              className="p-2 rounded-md text-dark-text-secondary hover:text-dark-text"
+              onClick={close}
+            >
               <X size={18} />
             </button>
           </div>
@@ -65,15 +71,22 @@ export default function AttachmentsModal() {
               />
               <div className="flex flex-col items-center gap-2 text-dark-text-secondary">
                 <Upload size={22} />
-                <p className="text-sm">Drag & drop PDF files here, or click to browse</p>
-                <p className="text-xs opacity-70">Only PDF files are accepted</p>
+                <p className="text-sm">
+                  Drag & drop PDF files here, or click to browse
+                </p>
+                <p className="text-xs opacity-70">
+                  Only PDF files are accepted
+                </p>
               </div>
             </label>
 
             {attachments.length > 0 && (
               <div className="space-y-2">
-                {attachments.map(a => (
-                  <div key={a.id} className="flex items-center justify-between text-sm bg-dark-bg-secondary border border-dark-border rounded-lg px-3 py-2">
+                {attachments.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center justify-between text-sm bg-dark-bg-secondary border border-dark-border rounded-lg px-3 py-2"
+                  >
                     <span className="truncate">{a.name}</span>
                     <button
                       className="text-dark-text-secondary hover:text-accent-red"

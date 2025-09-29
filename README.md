@@ -18,7 +18,6 @@ It includes secure API-key storage (Keytar on macOS Keychain / Windows Credentia
 
 ## To Do
 
-- Add file support for Gemini
 - Add prompt enhancer button
 - Add support for image API models
 - Polish prompt library code

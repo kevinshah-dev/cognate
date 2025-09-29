@@ -62,7 +62,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           if (!apiKeyGoogle || typeof apiKeyGoogle !== "string") {
             return { status: "error", error: "Google API key is not set." };
           }
-          return callGemini(provider, prompt, apiKeyGoogle);
+          return callGemini(provider, prompt, apiKeyGoogle, attachments);
 
         default:
           return {

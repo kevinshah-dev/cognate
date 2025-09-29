@@ -66,12 +66,10 @@ export async function callAnthropic(
           {
             role: "user",
             content: [
-              // one 'document' block per uploaded PDF
               ...fileIds.map((id) => ({
                 type: "document" as const,
                 source: { type: "file" as const, file_id: id },
               })),
-              // your instruction/prompt
               {
                 type: "text" as const,
                 text: prompt || "Analyze the attached PDFs.",
