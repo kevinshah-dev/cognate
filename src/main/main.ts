@@ -1,6 +1,8 @@
 // src/main/main.ts
 import { app, BrowserWindow, ipcMain } from "electron";
 import { registerApiHandlers } from "./api";
+import Store from "electron-store";
+import { PromptEntry } from "../renderer/types";
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -8,6 +10,44 @@ const SERVICE = "cognate"; //Keychain / Credential Manager
 const KNOWN_ACCOUNTS = ["openai", "anthropic", "google", "deepseek"] as const;
 
 const keytar = require("keytar") as typeof import("keytar");
+
+const historyStore = new Store<{ history: PromptEntry[] }>({
+  name: "history",
+  defaults: { history: [] },
+});
+
+ipcMain.handle("history:list", () => {
+  const items = historyStore.get("history") || [];
+  return [...items].sort((a, b) => b.createdAt - a.createdAt);
+});
+
+ipcMain.handle(
+  "history:add",
+  (_evt, entry: Omit<PromptEntry, "id" | "createdAt">) => {
+    const items = historyStore.get("history") || [];
+    const newItem: PromptEntry = {
+      id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+      createdAt: Date.now(),
+      ...entry,
+    };
+    historyStore.set("history", [newItem, ...items].slice(0, 500)); // keep last 500
+    return newItem;
+  }
+);
+
+ipcMain.handle("history:delete", (_evt, id: string) => {
+  const items = historyStore.get("history") || [];
+  historyStore.set(
+    "history",
+    items.filter((h) => h.id !== id)
+  );
+  return { success: true };
+});
+
+ipcMain.handle("history:clear", () => {
+  historyStore.set("history", []);
+  return { success: true };
+});
 
 ipcMain.handle(
   "get-electron-version",

@@ -4,18 +4,32 @@ declare global {
   interface Window {
     electronAPI: {
       getElectronVersion: () => Promise<string>;
-      // Add our new generic invoke function signature
       invoke: (channel: string, ...args: any[]) => Promise<any>;
 
-      getApiKeys: () => Promise<{ openai: string; anthropic: string; google: string; deepseek: string }>;
-      setApiKeys: (keys: Record<string, string>) => Promise<{ success: boolean }>;
+      getApiKeys: () => Promise<{
+        openai: string;
+        anthropic: string;
+        google: string;
+        deepseek: string;
+      }>;
+      setApiKeys: (
+        keys: Record<string, string>
+      ) => Promise<{ success: boolean }>;
 
+      listHistory: () => Promise<PromptEntry[]>;
+      addHistory: (entry: {
+        text: string;
+        providers: string[];
+        attachmentNames?: string[];
+      }) => Promise<PromptEntry>;
+      deleteHistory: (id: string) => Promise<{ success: boolean }>;
+      clearHistory: () => Promise<{ success: boolean }>;
     };
   }
 }
 
 // Represents the status of an API call
-export type ApiResponseStatus = 'idle' | 'loading' | 'success' | 'error';
+export type ApiResponseStatus = "idle" | "loading" | "success" | "error";
 
 // Defines a single AI provider that the user can select
 export interface ApiProvider {
@@ -46,10 +60,9 @@ export interface Attachment {
   id: string;
   name: string;
   size: number;
-  type: string;         // mime type, e.g. 'application/pdf'
-  data: ArrayBuffer;    // file bytes (renderer → main via IPC)
+  type: string; // mime type, e.g. 'application/pdf'
+  data: ArrayBuffer; // file bytes (renderer → main via IPC)
 }
-
 
 // Defines the shape of our global application state
 export interface AppState {
@@ -58,7 +71,10 @@ export interface AppState {
   responses: ApiResponse[];
   setPrompt: (prompt: string) => void;
   toggleProvider: (providerId: string) => void;
-  updateProviderSettings: (providerId: string, settings: Partial<ApiProvider['settings']>) => void;
+  updateProviderSettings: (
+    providerId: string,
+    settings: Partial<ApiProvider["settings"]>
+  ) => void;
   sendPromptToApis: () => void;
 
   settingsOpen: boolean;
@@ -73,5 +89,22 @@ export interface AppState {
   removeAttachment: (id: string) => void;
   clearAttachments: () => void;
 
+  currentView: View;
+  goTo: (v: View) => void;
 
+  // prompt history
+  promptHistory: PromptEntry[];
+  loadHistory: () => Promise<void>;
+  deleteHistory: (id: string) => Promise<void>;
+  clearHistory: () => Promise<void>;
 }
+
+export type View = "compare" | "library";
+
+export type PromptEntry = {
+  id: string;
+  text: string;
+  createdAt: number; // Date.now()
+  providers: string[]; // ids selected when sent
+  attachmentNames?: string[];
+};

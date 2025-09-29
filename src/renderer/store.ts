@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { AppState, ApiProvider, ApiResponse, Attachment } from "./types";
 import { v4 as uuidv4 } from "uuid";
+import { View } from "./types";
 
 function isPdf(file: File) {
   return (
@@ -66,6 +67,29 @@ const useAppStore = create<AppState>((set, get) => ({
   ],
   responses: [],
 
+  currentView: "compare" as View,
+  goTo: (v: View) => set({ currentView: v }),
+
+  promptHistory: [] as {
+    id: string;
+    text: string;
+    createdAt: number;
+    providers: string[];
+    attachmentNames?: string[];
+  }[],
+  loadHistory: async () => {
+    const list = await window.electronAPI.listHistory?.();
+    set({ promptHistory: Array.isArray(list) ? list : [] });
+  },
+  deleteHistory: async (id: string) => {
+    await window.electronAPI.deleteHistory?.(id);
+    get().loadHistory();
+  },
+  clearHistory: async () => {
+    await window.electronAPI.clearHistory?.();
+    set({ promptHistory: [] });
+  },
+
   settingsOpen: false,
   openSettings: () => set({ settingsOpen: true }),
   closeSettings: () => set({ settingsOpen: false }),
@@ -119,6 +143,14 @@ const useAppStore = create<AppState>((set, get) => ({
     const selectedProviders = providers.filter((p) => p.selected);
 
     if (!prompt || selectedProviders.length === 0) return;
+
+    try {
+      await window.electronAPI.addHistory?.({
+        text: prompt,
+        providers: selectedProviders.map((p) => p.id),
+        attachmentNames: attachments.map((a) => a.name),
+      });
+    } catch {}
 
     // 1. Set initial loading state (same as before)
     const initialResponses: ApiResponse[] = selectedProviders.map((p) => ({
