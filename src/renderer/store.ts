@@ -24,14 +24,26 @@ const useAppStore = create<AppState>((set, get) => ({
     {
       id: "openai",
       name: "OpenAI GPT-5",
-      selected: true,
+      selected: false,
       settings: { model: "gpt-5", max_tokens: 8192 },
+    },
+    {
+      id: "openai-mini-5",
+      name: "OpenAI GPT-5 Mini",
+      selected: false,
+      settings: { model: "gpt-5-mini", max_tokens: 8192 },
     },
     {
       id: "anthropic",
       name: "Claude Opus 4.1",
-      selected: true,
+      selected: false,
       settings: { model: "claude-opus-4-1-20250805", max_tokens: 8192 },
+    },
+    {
+      id: "anthropic-sonnet-4",
+      name: "Claude Sonnet 4",
+      selected: false,
+      settings: { model: "claude-sonnet-4-0", max_tokens: 8192 },
     },
     {
       id: "google",
@@ -44,6 +56,12 @@ const useAppStore = create<AppState>((set, get) => ({
       name: "DeepSeek V3.1",
       selected: false,
       settings: { model: "deepseek-chat", max_tokens: 8192 },
+    },
+    {
+      id: "deepseek-reasoner",
+      name: "DeepSeek V3.1 Thinking",
+      selected: false,
+      settings: { model: "deepseek-reasoner", max_tokens: 8192 },
     },
   ],
   responses: [],

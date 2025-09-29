@@ -31,6 +31,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
 
       switch (provider.id) {
         case "openai":
+        case "openai-mini-5":
           const apiKey = await getApiKey("openai");
           if (!apiKey || typeof apiKey !== "string") {
             return { status: "error", error: "OpenAI API key is not set." };
@@ -38,6 +39,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           return callOpenAI(provider, prompt, apiKey, attachments);
 
         case "anthropic":
+        case "anthropic-sonnet-4":
           const apiKeyAnthropic = await getApiKey("anthropic");
           if (!apiKeyAnthropic || typeof apiKeyAnthropic !== "string") {
             return { status: "error", error: "Anthropic API key is not set." };
@@ -45,11 +47,12 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           return callAnthropic(provider, prompt, apiKeyAnthropic, attachments);
 
         case "deepseek":
+        case "deepseek-reasoner":
           const apiKeyDeepseek = await getApiKey("deepseek");
           console.log("apiKeyDeepseek", apiKeyDeepseek);
           if (!apiKeyDeepseek || typeof apiKeyDeepseek !== "string") {
-            console.log("!apiKeyDeepseek", !apiKeyDeepseek);
-            console.log("typeof apiKeyDeepseek", typeof apiKeyDeepseek);
+            //console.log("!apiKeyDeepseek", !apiKeyDeepseek);
+            //console.log("typeof apiKeyDeepseek", typeof apiKeyDeepseek);
             return { status: "error", error: "DeepSeek API key is not set." };
           }
           return callDeepSeek(provider, prompt, apiKeyDeepseek);

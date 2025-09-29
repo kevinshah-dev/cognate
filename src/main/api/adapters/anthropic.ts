@@ -9,7 +9,7 @@ import { promisify } from "util";
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
 
-const FILES_BETA = ["files-api-2025-04-14"]; // required for Files API
+const FILES_BETA = ["files-api-2025-04-14"];
 
 export async function callAnthropic(
   provider: ApiProvider,
@@ -54,7 +54,6 @@ export async function callAnthropic(
       }
     }
 
-    // 2) Create the message
     let msg;
 
     if (fileIds.length > 0) {
@@ -99,9 +98,8 @@ export async function callAnthropic(
 
     const endTime = Date.now();
 
-    // 4) Cleanup temp files (best-effort)
     for (const p of tempPaths) unlink(p).catch(() => {});
-
+    console.log("response callAnthropic", msg);
     return {
       status: "success",
       content: text,
@@ -112,7 +110,6 @@ export async function callAnthropic(
       },
     };
   } catch (err: any) {
-    // Cleanup on error too
     for (const p of tempPaths) unlink(p).catch(() => {});
     const message =
       err?.error?.message ||

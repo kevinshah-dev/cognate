@@ -17,7 +17,7 @@ export async function callOpenAI(
   attachments?: Attachment[]
 ): Promise<Partial<ApiResponse>> {
   const client = new OpenAI({ apiKey });
-
+  //console.log("provider callOpenAI", provider);
   try {
     const startTime = Date.now();
     let fileIds: string[] = [];
@@ -37,7 +37,7 @@ export async function callOpenAI(
         );
         tempPaths.push(tmp);
 
-        const buf = Buffer.from(a.data); // ArrayBuffer -> Buffer
+        const buf = Buffer.from(a.data);
         await writeFile(tmp, buf);
 
         const created = await client.files.create({
@@ -72,6 +72,7 @@ export async function callOpenAI(
         ],
       });
     } else {
+      console.log("provider.settings.model", provider.settings.model);
       response = await client.responses.create({
         model: provider.settings.model,
         max_output_tokens: provider.settings.max_tokens,
@@ -84,6 +85,8 @@ export async function callOpenAI(
     for (const p of tempPaths) {
       unlink(p).catch(() => {});
     }
+
+    console.log("response callOpenAI", response);
 
     return {
       status: "success",

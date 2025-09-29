@@ -75,6 +75,11 @@ function CopyWithTooltip({
   );
 }
 
+function formatNum(n?: number) {
+  if (n === null || n === undefined) return "0";
+  return n.toLocaleString();
+}
+
 export const ResponseGrid = () => {
   const { responses, providers } = useAppStore(useShallow(selector));
   const [active, setActive] = React.useState<{
@@ -97,7 +102,7 @@ export const ResponseGrid = () => {
 
   return (
     <>
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto">
         {responses.map((response) => {
           const provider = providers.find((p) => p.id === response.providerId);
           const providerName = provider?.name || "Unknown";
@@ -156,8 +161,8 @@ const CollapsedResponseCard = ({
       case "success":
         // Collapsed body: cap height + fade overlay
         return (
-          <div className="relative">
-            <div className="prose prose-invert prose-sm max-w-none text-dark-text whitespace-pre-wrap max-h-[50vh] overflow-hidden pb-1">
+          <div className="relative min-h-0">
+            <div className="prose prose-invert prose-sm max-w-none text-dark-text whitespace-pre-wrap max-h-[65vh] overflow-hidden pb-1">
               {response.content}
             </div>
           </div>
@@ -173,19 +178,32 @@ const CollapsedResponseCard = ({
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
-      className="bg-dark-card border border-dark-border rounded-lg flex flex-col hover:border-accent-blue/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-blue"
+      className="relative bg-dark-card border border-dark-border rounded-lg flex flex-col min-h-0 overflow-hidden hover:border-accent-blue/50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-blue"
     >
       <div className="flex justify-between items-center p-3 border-b border-dark-border">
         <h4 className="font-semibold text-dark-text-secondary">
           {providerName}
         </h4>
+
         <div className="flex items-center space-x-3">
           {response.status === "success" && (
-            <span className="text-xs text-dark-text-secondary/70">
-              {response.responseTime.toFixed(0)}ms
-            </span>
+            <>
+              <span className="text-xs text-dark-text-secondary/70">
+                {response.responseTime.toFixed(0)}ms
+              </span>
+
+              <span
+                className="text-[10px] px-2 py-0.5 rounded-md border border-dark-border text-dark-text-secondary/80 bg-dark-bg-secondary"
+                title="Input / Output tokens"
+              >
+                I: {formatNum(response.tokenUsage?.prompt)} · O:{" "}
+                {formatNum(response.tokenUsage?.completion)}
+              </span>
+            </>
           )}
+
           <CopyWithTooltip text={response.content} stopPropagation />
+
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -243,9 +261,7 @@ const ResponseModal = ({ response, providerName, onClose }: ModalProps) => {
 
   return (
     <div className="fixed inset-0 z-50">
-      {/* backdrop */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      {/* dialog */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div
           className="w-full max-w-4xl max-h-[85vh] bg-dark-card border border-dark-border rounded-2xl shadow-xl flex flex-col"
@@ -257,11 +273,21 @@ const ResponseModal = ({ response, providerName, onClose }: ModalProps) => {
                 {providerName}
               </h4>
               {response.status === "success" && (
-                <span className="text-xs text-dark-text-secondary/70">
-                  {response.responseTime.toFixed(0)}ms
-                </span>
+                <>
+                  <span className="text-xs text-dark-text-secondary/70">
+                    {response.responseTime.toFixed(0)}ms
+                  </span>
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded-md border border-dark-border text-dark-text-secondary/80 bg-dark-bg-secondary"
+                    title="Input / Output tokens"
+                  >
+                    I: {formatNum(response.tokenUsage?.prompt)} · O:{" "}
+                    {formatNum(response.tokenUsage?.completion)}
+                  </span>
+                </>
               )}
             </div>
+
             <div className="flex items-center gap-3">
               <CopyWithTooltip text={response.content} stopPropagation />
               <button
