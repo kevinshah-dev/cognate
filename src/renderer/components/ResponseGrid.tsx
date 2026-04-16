@@ -7,6 +7,7 @@ import {
   Copy,
   BrainCircuit,
   Maximize2,
+  Download,
   X,
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
@@ -78,6 +79,93 @@ function CopyWithTooltip({
 function formatNum(n?: number) {
   if (n === null || n === undefined) return "0";
   return n.toLocaleString();
+}
+
+function getImageExtension(mime?: string) {
+  if (!mime) return "png";
+  const [, subtype = "png"] = mime.split("/");
+  return subtype.toLowerCase();
+}
+
+function sanitizeFilePart(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function downloadImage(base64: string, mime: string, filename: string) {
+  const href = `data:${mime};base64,${base64}`;
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function buildImageFilename(providerName: string, index: number, mime: string) {
+  const providerSlug = sanitizeFilePart(providerName) || "generated-image";
+  return `${providerSlug}-${index + 1}.${getImageExtension(mime)}`;
+}
+
+function downloadImages(
+  images: NonNullable<ApiResponse["images"]>,
+  providerName: string
+) {
+  images.forEach((img, index) => {
+    downloadImage(
+      img.base64,
+      img.mime,
+      buildImageFilename(providerName, index, img.mime)
+    );
+  });
+}
+
+function DownloadImagesButton({
+  images,
+  providerName,
+  stopPropagation = false,
+}: {
+  images: NonNullable<ApiResponse["images"]>;
+  providerName: string;
+  stopPropagation?: boolean;
+}) {
+  const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (stopPropagation) e.stopPropagation();
+    downloadImages(images, providerName);
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      aria-label={images.length > 1 ? "Download all images" : "Download image"}
+      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border border-dark-border text-dark-text-secondary/80 bg-dark-bg-secondary hover:text-accent-blue hover:border-accent-blue/40 transition-colors"
+      title={images.length > 1 ? "Download all images" : "Download image"}
+    >
+      <Download size={12} />
+      {images.length > 1 ? "Download All" : "Download"}
+    </button>
+  );
+}
+
+function ImageTile({
+  base64,
+  mime,
+  alt,
+  className,
+}: {
+  base64: string;
+  mime: string;
+  alt: string;
+  className: string;
+}) {
+  return (
+    <div className="relative">
+      <img
+        src={`data:${mime};base64,${base64}`}
+        alt={alt}
+        className={className}
+      />
+    </div>
+  );
 }
 
 export const ResponseGrid = () => {
@@ -164,10 +252,11 @@ const CollapsedResponseCard = ({
           return (
             <div className="grid grid-cols-2 gap-2">
               {response.images.slice(0, 4).map((img, i) => (
-                <img
+                <ImageTile
                   key={i}
-                  src={`data:${img.mime};base64,${img.base64}`}
-                  alt={`Generated ${i}`}
+                  base64={img.base64}
+                  mime={img.mime}
+                  alt={`Generated image ${i + 1}`}
                   className="rounded-md border border-dark-border object-contain max-h-48 bg-dark-bg-secondary"
                 />
               ))}
@@ -213,6 +302,14 @@ const CollapsedResponseCard = ({
                 I: {formatNum(response.tokenUsage?.prompt)} · O:{" "}
                 {formatNum(response.tokenUsage?.completion)}
               </span>
+
+              {response.kind === "image" && response.images?.length ? (
+                <DownloadImagesButton
+                  images={response.images}
+                  providerName={providerName}
+                  stopPropagation
+                />
+              ) : null}
             </>
           )}
 
@@ -267,10 +364,11 @@ const ResponseModal = ({ response, providerName, onClose }: ModalProps) => {
           return (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {response.images.map((img, i) => (
-                <img
+                <ImageTile
                   key={i}
-                  src={`data:${img.mime};base64,${img.base64}`}
-                  alt={`Generated ${i}`}
+                  base64={img.base64}
+                  mime={img.mime}
+                  alt={`Generated image ${i + 1}`}
                   className="rounded-lg border border-dark-border object-contain max-h-[40vh] bg-dark-bg-secondary"
                 />
               ))}
@@ -312,6 +410,13 @@ const ResponseModal = ({ response, providerName, onClose }: ModalProps) => {
                     I: {formatNum(response.tokenUsage?.prompt)} · O:{" "}
                     {formatNum(response.tokenUsage?.completion)}
                   </span>
+
+                  {response.kind === "image" && response.images?.length ? (
+                    <DownloadImagesButton
+                      images={response.images}
+                      providerName={providerName}
+                    />
+                  ) : null}
                 </>
               )}
             </div>

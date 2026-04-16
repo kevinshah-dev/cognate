@@ -1,7 +1,7 @@
 // src/renderer/components/ProviderPanel.tsx
 import React from "react";
 import useAppStore from "../store";
-import { Check, SlidersHorizontal, Info, Settings, Key } from "lucide-react";
+import { Check, Key } from "lucide-react";
 import { AppState, ApiProvider } from "../types";
 import { useShallow } from "zustand/react/shallow";
 
@@ -20,7 +20,10 @@ export const ProviderPanel = () => {
   const goTo = useAppStore((s) => s.goTo);
 
   const filteredProviders = React.useMemo(
-    () => providers.filter((p) => mode === "text" || p.supportsImage),
+    () =>
+      providers.filter((p) =>
+        mode === "image" ? p.supportsImage : p.supportsText !== false
+      ),
     [providers, mode]
   );
 

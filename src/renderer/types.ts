@@ -34,12 +34,14 @@ export type ApiResponseStatus = "idle" | "loading" | "success" | "error";
 // Defines a single AI provider that the user can select
 export interface ApiProvider {
   id: string; // e.g., 'openai', 'anthropic'
+  apiProviderId?: string; // optional backend handler id when UI needs a distinct local id
   name: string; // e.g., 'OpenAI GPT-4', 'Claude 3 Opus'
   selected: boolean;
   settings: {
     model: string;
     max_tokens: number;
   };
+  supportsText?: boolean;
   supportsImage?: boolean;
 }
 

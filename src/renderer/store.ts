@@ -1,6 +1,6 @@
 // src/renderer/store.ts
 import { create } from "zustand";
-import { AppState, ApiProvider, ApiResponse, Attachment, TaskMode } from "./types";
+import { AppState, ApiResponse, Attachment, TaskMode } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { View } from "./types";
 
@@ -42,7 +42,7 @@ const useAppStore = create<AppState>((set, get) => ({
       name: "Claude Opus 4.1",
       selected: false,
       settings: { model: "claude-opus-4-1-20250805", max_tokens: 8192 },
-      supportsImage: true,
+      supportsImage: false,
     },
     {
       id: "anthropic-sonnet-4",
@@ -57,6 +57,15 @@ const useAppStore = create<AppState>((set, get) => ({
       selected: false,
       settings: { model: "gemini-2.5-pro", max_tokens: 8192 },
       supportsImage: false,
+    },
+    {
+      id: "google-image",
+      apiProviderId: "google",
+      name: "Google Gemini Image",
+      selected: false,
+      settings: { model: "gemini-2.5-flash-image", max_tokens: 8192 },
+      supportsText: false,
+      supportsImage: true,
     },
     {
       id: "deepseek",
@@ -149,8 +158,12 @@ const useAppStore = create<AppState>((set, get) => ({
     })),
 
   sendPromptToApis: async () => {
-    const { prompt, providers, attachments, clearAttachments, mode } = get();
-    const selectedProviders = providers.filter((p) => p.selected && (mode === "text" || p.supportsImage));
+    const { prompt, providers, attachments, mode } = get();
+    const selectedProviders = providers.filter(
+      (p) =>
+        p.selected &&
+        (mode === "image" ? p.supportsImage : p.supportsText !== false)
+    );
 
     if (!prompt || selectedProviders.length === 0) return;
 
@@ -177,11 +190,14 @@ const useAppStore = create<AppState>((set, get) => ({
 
     await Promise.all(
       selectedProviders.map(async (provider) => {
-        const payload: any = { provider, prompt, task: mode };
+        const requestProvider = provider.apiProviderId
+          ? { ...provider, id: provider.apiProviderId }
+          : provider;
+        const payload: any = { provider: requestProvider, prompt, task: mode };
         if (
-          (provider.id === "openai" ||
-            provider.id === "anthropic" ||
-            provider.id === "google") &&
+          (requestProvider.id === "openai" ||
+            requestProvider.id === "anthropic" ||
+            requestProvider.id === "google") &&
           attachments.length > 0
         ) {
           // strip ArrayBuffers into plain {name,type,size,data} — ArrayBuffer passes fine over IPC

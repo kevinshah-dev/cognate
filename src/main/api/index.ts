@@ -67,6 +67,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           return callDeepSeek(provider, prompt, apiKeyDeepseek);
 
         case "google":
+        case "google-image":
           const apiKeyGoogle = await getApiKey("google");
           if (!apiKeyGoogle || typeof apiKeyGoogle !== "string") {
             return { status: "error", error: "Google API key is not set." };
