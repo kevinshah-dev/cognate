@@ -17,6 +17,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
       payload: {
         provider: ApiProvider;
         prompt: string;
+        task?: "text" | "image";
         attachments?: {
           id: string;
           name: string;
@@ -27,7 +28,7 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
       }
     ): Promise<Partial<ApiResponse>> => {
       let apiKey: string | unknown;
-      const { provider, prompt, attachments } = payload;
+      const { provider, prompt, attachments, task = "text" } = payload;
 
       switch (provider.id) {
         case "openai":
@@ -36,7 +37,15 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           if (!apiKey || typeof apiKey !== "string") {
             return { status: "error", error: "OpenAI API key is not set." };
           }
+
+          if (task === "image") {
+            const { callOpenAIImage } = await import("./adapters/openai-image");
+            return callOpenAIImage(provider, prompt, apiKey);
+          }
+
           return callOpenAI(provider, prompt, apiKey, attachments);
+
+        
 
         case "anthropic":
         case "anthropic-sonnet-4":
@@ -62,6 +71,13 @@ export function registerApiHandlers(getApiKey: GetApiKey) {
           if (!apiKeyGoogle || typeof apiKeyGoogle !== "string") {
             return { status: "error", error: "Google API key is not set." };
           }
+
+          if (task === "image") {
+            const { callGeminiImage } = await import("./adapters/google-image");
+            return callGeminiImage(provider, prompt, apiKeyGoogle);
+          }
+
+
           return callGemini(provider, prompt, apiKeyGoogle, attachments);
 
         default:

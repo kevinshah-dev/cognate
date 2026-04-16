@@ -9,23 +9,46 @@ const selector = (state: AppState) => ({
   providers: state.providers,
   toggleProvider: state.toggleProvider,
   openSettings: state.openSettings, // Settings Modal
+  mode: state.mode,
+  setMode: state.setMode,
 });
 
 export const ProviderPanel = () => {
-  const { providers, toggleProvider, openSettings } = useAppStore(
-    useShallow(selector)
-  );
+  const { providers, toggleProvider, openSettings, mode, setMode } =
+    useAppStore(useShallow(selector));
 
   const goTo = useAppStore((s) => s.goTo);
 
+  const filteredProviders = React.useMemo(
+    () => providers.filter((p) => mode === "text" || p.supportsImage),
+    [providers, mode]
+  );
+
   return (
     <div className="flex flex-col h-full">
+      <div className="mb-3">
+        <div className="inline-flex rounded-md border border-dark-border overflow-hidden">
+          <button
+            className={`px-3 py-1.5 text-sm ${mode === "text" ? "bg-accent-blue text-white" : "text-dark-text-secondary hover:bg-dark-border/40"}`}
+            onClick={() => setMode("text")}
+          >
+            Text
+          </button>
+          <button
+            className={`px-3 py-1.5 text-sm ${mode === "image" ? "bg-accent-blue text-white" : "text-dark-text-secondary hover:bg-dark-border/40"}`}
+            onClick={() => setMode("image")}
+          >
+            Images
+          </button>
+        </div>
+      </div>
+
       <h2 className="text-lg font-semibold mb-4 text-dark-text-secondary">
-        Models
+        {mode === "text" ? "Models" : "Image Models"}
       </h2>
 
       <div className="space-y-3 flex-1 overflow-y-auto">
-        {providers.map((provider) => (
+        {filteredProviders.map((provider) => (
           <ProviderCard
             key={provider.id}
             provider={provider}

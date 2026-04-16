@@ -159,7 +159,21 @@ const CollapsedResponseCard = ({
           </div>
         );
       case "success":
-        // Collapsed body: cap height + fade overlay
+        if (response.kind === "image" && response.images?.length) {
+          // image grid (collapsed)
+          return (
+            <div className="grid grid-cols-2 gap-2">
+              {response.images.slice(0, 4).map((img, i) => (
+                <img
+                  key={i}
+                  src={`data:${img.mime};base64,${img.base64}`}
+                  alt={`Generated ${i}`}
+                  className="rounded-md border border-dark-border object-contain max-h-48 bg-dark-bg-secondary"
+                />
+              ))}
+            </div>
+          );
+        }
         return (
           <div className="relative min-h-0">
             <div className="prose prose-invert prose-sm max-w-none text-dark-text whitespace-pre-wrap max-h-[65vh] overflow-hidden pb-1">
@@ -249,6 +263,20 @@ const ResponseModal = ({ response, providerName, onClose }: ModalProps) => {
           </div>
         );
       case "success":
+        if (response.kind === "image" && response.images?.length) {
+          return (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {response.images.map((img, i) => (
+                <img
+                  key={i}
+                  src={`data:${img.mime};base64,${img.base64}`}
+                  alt={`Generated ${i}`}
+                  className="rounded-lg border border-dark-border object-contain max-h-[40vh] bg-dark-bg-secondary"
+                />
+              ))}
+            </div>
+          );
+        }
         return (
           <div className="prose prose-invert prose-sm max-w-none text-dark-text whitespace-pre-wrap">
             {response.content}

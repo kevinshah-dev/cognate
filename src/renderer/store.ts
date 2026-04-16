@@ -1,6 +1,6 @@
 // src/renderer/store.ts
 import { create } from "zustand";
-import { AppState, ApiProvider, ApiResponse, Attachment } from "./types";
+import { AppState, ApiProvider, ApiResponse, Attachment, TaskMode } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { View } from "./types";
 
@@ -21,50 +21,60 @@ function readAsArrayBuffer(file: File) {
 const useAppStore = create<AppState>((set, get) => ({
   // --- STATE ---
   prompt: "",
+  mode: "text" as TaskMode,
   providers: [
     {
       id: "openai",
       name: "OpenAI GPT-5",
       selected: false,
       settings: { model: "gpt-5", max_tokens: 8192 },
+      supportsImage: true,
     },
     {
       id: "openai-mini-5",
       name: "OpenAI GPT-5 Mini",
       selected: false,
       settings: { model: "gpt-5-mini", max_tokens: 8192 },
+      supportsImage: true,
     },
     {
       id: "anthropic",
       name: "Claude Opus 4.1",
       selected: false,
       settings: { model: "claude-opus-4-1-20250805", max_tokens: 8192 },
+      supportsImage: true,
     },
     {
       id: "anthropic-sonnet-4",
       name: "Claude Sonnet 4",
       selected: false,
       settings: { model: "claude-sonnet-4-0", max_tokens: 8192 },
+      supportsImage: false,
     },
     {
       id: "google",
       name: "Google Gemini",
       selected: false,
       settings: { model: "gemini-2.5-pro", max_tokens: 8192 },
+      supportsImage: false,
     },
     {
       id: "deepseek",
       name: "DeepSeek V3.1",
       selected: false,
       settings: { model: "deepseek-chat", max_tokens: 8192 },
+      supportsImage: false,
     },
     {
       id: "deepseek-reasoner",
       name: "DeepSeek V3.1 Thinking",
       selected: false,
       settings: { model: "deepseek-reasoner", max_tokens: 8192 },
+      supportsImage: false,
     },
   ],
+
+  setMode: (mode: TaskMode) => set({ mode }),
   responses: [],
 
   currentView: "compare" as View,
@@ -139,8 +149,8 @@ const useAppStore = create<AppState>((set, get) => ({
     })),
 
   sendPromptToApis: async () => {
-    const { prompt, providers, attachments, clearAttachments } = get();
-    const selectedProviders = providers.filter((p) => p.selected);
+    const { prompt, providers, attachments, clearAttachments, mode } = get();
+    const selectedProviders = providers.filter((p) => p.selected && (mode === "text" || p.supportsImage));
 
     if (!prompt || selectedProviders.length === 0) return;
 
@@ -158,6 +168,8 @@ const useAppStore = create<AppState>((set, get) => ({
       providerId: p.id,
       status: "loading",
       content: "",
+      images: mode === "image" ? [] : undefined,
+      kind: mode,
       tokenUsage: { prompt: 0, completion: 0 },
       responseTime: 0,
     }));
@@ -165,7 +177,7 @@ const useAppStore = create<AppState>((set, get) => ({
 
     await Promise.all(
       selectedProviders.map(async (provider) => {
-        const payload: any = { provider, prompt };
+        const payload: any = { provider, prompt, task: mode };
         if (
           (provider.id === "openai" ||
             provider.id === "anthropic" ||

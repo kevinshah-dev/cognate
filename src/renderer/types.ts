@@ -40,6 +40,7 @@ export interface ApiProvider {
     model: string;
     max_tokens: number;
   };
+  supportsImage?: boolean;
 }
 
 // Represents the response from a single AI provider for a given prompt
@@ -54,6 +55,10 @@ export interface ApiResponse {
     completion: number;
   };
   error?: string; // Error message if the status is 'error'
+
+  kind?: "text" | "image";
+
+  images?: ImagePart[]
 }
 
 export interface Attachment {
@@ -67,6 +72,8 @@ export interface Attachment {
 // Defines the shape of our global application state
 export interface AppState {
   prompt: string;
+  mode: TaskMode;
+  setMode: (mode: TaskMode) => void;
   providers: ApiProvider[];
   responses: ApiResponse[];
   setPrompt: (prompt: string) => void;
@@ -101,6 +108,8 @@ export interface AppState {
 
 export type View = "compare" | "library";
 
+export type TaskMode = "text" | "image";
+
 export type PromptEntry = {
   id: string;
   text: string;
@@ -108,3 +117,8 @@ export type PromptEntry = {
   providers: string[]; // ids selected when sent
   attachmentNames?: string[];
 };
+
+export interface ImagePart {
+  mime: string; // e.g., "image/png"
+  base64: string; // base64-encoded image data
+}
